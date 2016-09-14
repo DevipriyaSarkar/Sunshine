@@ -7,6 +7,7 @@ import datetime
 import tkFont
 import contextlib
 import json
+from sys import platform as sp
 
 
 class Weather:
@@ -135,7 +136,11 @@ class Weather:
 
 root = Tk()
 root.wm_title("Sunshine")
-root.iconbitmap(default='sun.ico')
+if sp=='linux' or sp=='linux2' or sp=='darwin':
+    img = PhotoImage(file='sun.png')
+    root.tk.call('wm', 'iconphoto', root._w, img)
+else:
+    root.iconbitmap(default='sun.ico')
 degree_sign = u'\N{DEGREE SIGN}'
 weather = Weather(root)
 root.mainloop()
