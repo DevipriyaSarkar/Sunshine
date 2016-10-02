@@ -8,54 +8,81 @@ import tkFont
 import contextlib
 import json
 from sys import platform as sp
+import socket
+
+
+# check for internet connectivity
+def is_connected():
+    try:
+        # see if we can resolve the host name -- tells us if there is a DNS listening
+        host = socket.gethostbyname(REMOTE_SERVER)
+        # connect to the host -- tells us if the host is actually reachable
+        s = socket.create_connection((host, 80), 2)
+        return True
+    except:
+        pass
+    return False
 
 
 class Weather:
     def __init__(self, master):
-        self.city_name = "Bangalore"
-        self.day = 0
-        self.custom_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
-        self.custom_heading_font = tkFont.Font(family="Helvetica", size=14, weight="bold")
-        self.current_city_id = self.get_city_id(self.city_name)  # open weather map city id
-        if self.current_city_id != -1:  # if city id found
-            # initialization of all member variables to None
-            self.t_dt = StringVar()
-            self.t_temp_day = StringVar()
-            self.t_temp_min = StringVar()
-            self.t_temp_max = StringVar()
-            self.t_pressure = StringVar()
-            self.t_humidity = StringVar()
-            self.t_weather_icon_url = None
-            self.t_weather_main = StringVar()
-            self.t_weather_desc = StringVar()
-            self.t_wind_speed = StringVar()
-            self.t_wind_dir = StringVar()
-            self.t_cloudiness = StringVar()
-            self.t_rain = StringVar()
-            self.label_weather_icon = Label(master)
-            # retrieve and display weather data
-            self.get_weather(self.current_city_id, self.day)
-            self.display_data(master)
+        if is_connected():  # internet available, fetch weather data
+            self.city_name = "Bangalore"
+            self.day = 0
+            self.custom_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
+            self.custom_heading_font = tkFont.Font(family="Helvetica", size=14, weight="bold")
+            self.current_city_id = self.get_city_id(self.city_name)  # open weather map city id
+            if self.current_city_id != -1:  # if city id found
+                # initialization of all member variables to None
+                self.t_dt = StringVar()
+                self.t_temp_day = StringVar()
+                self.t_temp_min = StringVar()
+                self.t_temp_max = StringVar()
+                self.t_pressure = StringVar()
+                self.t_humidity = StringVar()
+                self.t_weather_icon_url = None
+                self.t_weather_main = StringVar()
+                self.t_weather_desc = StringVar()
+                self.t_wind_speed = StringVar()
+                self.t_wind_dir = StringVar()
+                self.t_cloudiness = StringVar()
+                self.t_rain = StringVar()
+                self.label_weather_icon = Label(master)
+                # retrieve and display weather data
+                self.get_weather(self.current_city_id, self.day)
+                self.display_data(master)
 
-            # bottom navigation frame
-            bottom_frame = Frame(master, height=2, borderwidth=1, relief=FLAT)
-            bottom_frame.grid(row=12, columnspan=2, padx=4, pady=4)
+                # bottom navigation frame
+                bottom_frame = Frame(master, height=2, borderwidth=1, relief=FLAT)
+                bottom_frame.grid(row=12, columnspan=2, padx=4, pady=4)
 
-            prev_img = ImageTk.PhotoImage(file="prev.png")
-            self.prev_button = Button(bottom_frame, text="<<", image=prev_img, command=self.go_to_prev)
-            self.prev_button.image = prev_img
-            self.prev_button.grid(row=12, column=0, padx=4, pady=4)
-            self.prev_button.config(state=DISABLED)
+                prev_img = ImageTk.PhotoImage(file="prev.png")
+                self.prev_button = Button(bottom_frame, text="<<", image=prev_img, command=self.go_to_prev)
+                self.prev_button.image = prev_img
+                self.prev_button.grid(row=12, column=0, padx=4, pady=4)
+                self.prev_button.config(state=DISABLED)
 
-            next_img = ImageTk.PhotoImage(file="next.png")
-            self.next_button = Button(bottom_frame, text=">>", image=next_img, command=self.go_to_next)
-            self.next_button.image = next_img
-            self.next_button.grid(row=12, column=1, padx=4, pady=4)
+                next_img = ImageTk.PhotoImage(file="next.png")
+                self.next_button = Button(bottom_frame, text=">>", image=next_img, command=self.go_to_next)
+                self.next_button.image = next_img
+                self.next_button.grid(row=12, column=1, padx=4, pady=4)
+
+            else:
+                # city id not found
+                master.geometry('300x300')
+                label_invalid = Label(master, text="Sorry, city not found.\nPlease try a different name.",
+                                      font=("Helvetica", 10, "bold"))
+                label_invalid.place(relx=0.5, rely=0.5, anchor="center")
+                label_invalid.pack(fill=BOTH, expand=1, padx=4, pady=4)
 
         else:
-            # city id not found
-            label_invalid = Label(master, text="Sorry, city not found. Please try a different name.")
-            label_invalid.pack()
+            # internet not available, display error message
+            master.geometry('300x300')
+            label_no_internet = Label(master, text="Sorry, can not connect to internet. \n"
+                                                   "Please check your connection and try again.",
+                                      font=("Helvetica", 10, "bold"))
+            label_no_internet.place(relx=0.5, rely=0.5, anchor="center")
+            label_no_internet.pack(fill=BOTH, expand=1, padx=4, pady=4)
 
     # get the weather information of the passed city id
     def get_weather(self, current_city_id, day):
@@ -139,6 +166,26 @@ class Weather:
         Label(master, text="Rain").grid(row=11, column=0, padx=2, pady=2)
         Label(master, textvariable=self.t_rain).grid(row=11, column=1, padx=2, pady=2)
 
+        self.scale_widgets(master)
+
+    # scale the widgets with the master window
+    def scale_widgets(self, master):
+        master.columnconfigure(0, weight=1)
+        master.columnconfigure(1, weight=1)
+        master.rowconfigure(0, weight=1)
+        master.rowconfigure(1, weight=1)
+        master.rowconfigure(2, weight=1)
+        master.rowconfigure(3, weight=1)
+        master.rowconfigure(4, weight=1)
+        master.rowconfigure(5, weight=1)
+        master.rowconfigure(6, weight=1)
+        master.rowconfigure(7, weight=1)
+        master.rowconfigure(8, weight=1)
+        master.rowconfigure(9, weight=1)
+        master.rowconfigure(10, weight=1)
+        master.rowconfigure(11, weight=1)
+        master.rowconfigure(12, weight=1)
+
     # set the weather icon
     def set_weather_icon(self):
         with contextlib.closing(urlopen(self.t_weather_icon_url)) as raw_data:
@@ -199,5 +246,6 @@ if sp == 'linux' or sp == 'linux2' or sp == 'darwin':
 else:
     root.iconbitmap(default='sun.ico')
 degree_sign = u'\N{DEGREE SIGN}'
+REMOTE_SERVER = "www.google.com"
 weather = Weather(root)
 root.mainloop()
