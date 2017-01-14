@@ -9,6 +9,7 @@ import contextlib
 import json
 from sys import platform as sp
 import socket
+import string
 
 
 # check for internet connectivity
@@ -25,64 +26,74 @@ def is_connected():
 
 
 class Weather:
-    def __init__(self, master):
-        if is_connected():  # internet available, fetch weather data
-            self.city_name = "Bangalore"
-            self.day = 0
-            self.custom_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
-            self.custom_heading_font = tkFont.Font(family="Helvetica", size=14, weight="bold")
-            self.current_city_id = self.get_city_id(self.city_name)  # open weather map city id
-            if self.current_city_id != -1:  # if city id found
-                # initialization of all member variables to None
-                self.t_dt = StringVar()
-                self.t_temp_day = StringVar()
-                self.t_temp_min = StringVar()
-                self.t_temp_max = StringVar()
-                self.t_pressure = StringVar()
-                self.t_humidity = StringVar()
-                self.t_weather_icon_url = None
-                self.t_weather_main = StringVar()
-                self.t_weather_desc = StringVar()
-                self.t_wind_speed = StringVar()
-                self.t_wind_dir = StringVar()
-                self.t_cloudiness = StringVar()
-                self.t_rain = StringVar()
-                self.label_weather_icon = Label(master)
-                # retrieve and display weather data
-                self.get_weather(self.current_city_id, self.day)
-                self.display_data(master)
+    def __init__(self, master, city):
+        button_city.config(state=DISABLED)
+        if city != "":
+            if is_connected():  # internet available, fetch weather data
+                weather_frame = Frame(master)
+                weather_frame.grid(row=0)
 
-                # bottom navigation frame
-                bottom_frame = Frame(master, height=2, borderwidth=1, relief=FLAT)
-                bottom_frame.grid(row=12, columnspan=2, padx=4, pady=4)
+                self.city_name = string.capwords(city)
+                self.day = 0
+                self.custom_font = tkFont.Font(family="Helvetica", size=12, weight="bold")
+                self.custom_heading_font = tkFont.Font(family="Helvetica", size=14, weight="bold")
+                self.current_city_id = self.get_city_id(self.city_name)  # open weather map city id
+                if self.current_city_id != -1:  # if city id found
+                    # initialization of all member variables to None
+                    self.t_dt = StringVar()
+                    self.t_temp_day = StringVar()
+                    self.t_temp_min = StringVar()
+                    self.t_temp_max = StringVar()
+                    self.t_pressure = StringVar()
+                    self.t_humidity = StringVar()
+                    self.t_weather_icon_url = None
+                    self.t_weather_main = StringVar()
+                    self.t_weather_desc = StringVar()
+                    self.t_wind_speed = StringVar()
+                    self.t_wind_dir = StringVar()
+                    self.t_cloudiness = StringVar()
+                    self.t_rain = StringVar()
+                    self.label_weather_icon = Label(weather_frame)
+                    # retrieve and display weather data
+                    self.get_weather(self.current_city_id, self.day)
+                    self.display_data(weather_frame)
 
-                prev_img = ImageTk.PhotoImage(file="prev.png")
-                self.prev_button = Button(bottom_frame, text="<<", image=prev_img, command=self.go_to_prev)
-                self.prev_button.image = prev_img
-                self.prev_button.grid(row=12, column=0, padx=4, pady=4)
-                self.prev_button.config(state=DISABLED)
+                    # bottom navigation frame
+                    bottom_frame = Frame(master, height=2, borderwidth=1, relief=FLAT)
+                    bottom_frame.grid(row=1, columnspan=2, padx=4, pady=4)
 
-                next_img = ImageTk.PhotoImage(file="next.png")
-                self.next_button = Button(bottom_frame, text=">>", image=next_img, command=self.go_to_next)
-                self.next_button.image = next_img
-                self.next_button.grid(row=12, column=1, padx=4, pady=4)
+                    prev_img = ImageTk.PhotoImage(file="prev.png")
+                    self.prev_button = Button(bottom_frame, text="<<", image=prev_img, command=self.go_to_prev)
+                    self.prev_button.image = prev_img
+                    self.prev_button.grid(row=0, column=0, padx=4, pady=4)
+                    self.prev_button.config(state=DISABLED)
+
+                    next_img = ImageTk.PhotoImage(file="next.png")
+                    self.next_button = Button(bottom_frame, text=">>", image=next_img, command=self.go_to_next)
+                    self.next_button.image = next_img
+                    self.next_button.grid(row=0, column=1, padx=4, pady=4)
+
+                else:
+                    # city id not found
+                    label_invalid = Label(master, text="Sorry, city not found.\nPlease try a different name.",
+                                          font=("Helvetica", 10, "bold"))
+                    label_invalid.place(relx=0.5, rely=0.5, anchor="center")
+                    label_invalid.pack(fill=BOTH, expand=1, padx=4, pady=4)
 
             else:
-                # city id not found
-                master.geometry('300x300')
-                label_invalid = Label(master, text="Sorry, city not found.\nPlease try a different name.",
-                                      font=("Helvetica", 10, "bold"))
-                label_invalid.place(relx=0.5, rely=0.5, anchor="center")
-                label_invalid.pack(fill=BOTH, expand=1, padx=4, pady=4)
-
+                # internet not available, display error message
+                label_no_internet = Label(master, text="Sorry, can not connect to internet. \n"
+                                                       "Please check your connection and try again.",
+                                          font=("Helvetica", 10, "bold"))
+                label_no_internet.place(relx=0.5, rely=0.5, anchor="center")
+                label_no_internet.pack(fill=BOTH, expand=1, padx=4, pady=4)
         else:
-            # internet not available, display error message
-            master.geometry('300x300')
-            label_no_internet = Label(master, text="Sorry, can not connect to internet. \n"
-                                                   "Please check your connection and try again.",
-                                      font=("Helvetica", 10, "bold"))
-            label_no_internet.place(relx=0.5, rely=0.5, anchor="center")
-            label_no_internet.pack(fill=BOTH, expand=1, padx=4, pady=4)
+            # string empty, display error message
+            label_empty_str = Label(master, text="Please enter a city to proceed.",
+                                    font=("Helvetica", 10, "bold"))
+            label_empty_str.place(relx=0.5, rely=0.5, anchor="center")
+            label_empty_str.pack(fill=BOTH, expand=1, padx=4, pady=4)
+        button_city.config(state=NORMAL)
 
     # get the weather information of the passed city id
     def get_weather(self, current_city_id, day):
@@ -169,7 +180,8 @@ class Weather:
         self.scale_widgets(master)
 
     # scale the widgets with the master window
-    def scale_widgets(self, master):
+    @staticmethod
+    def scale_widgets(master):
         master.columnconfigure(0, weight=1)
         master.columnconfigure(1, weight=1)
         master.rowconfigure(0, weight=1)
@@ -238,6 +250,14 @@ class Weather:
             self.next_button.config(state=NORMAL)
 
 
+# called on show weather button click
+def show():
+    city = entry_city.get()
+    print city
+    content_frame = Frame(root)
+    content_frame.grid(row=1, columnspan=2)
+    Weather(content_frame, city)
+
 root = Tk()
 root.wm_title("Sunshine")
 if sp == 'linux' or sp == 'linux2' or sp == 'darwin':
@@ -247,5 +267,30 @@ else:
     root.iconbitmap(default='sun.ico')
 degree_sign = u'\N{DEGREE SIGN}'
 REMOTE_SERVER = "www.google.com"
-weather = Weather(root)
+
+# top city frame
+font = tkFont.Font(family="Helvetica", size=10)
+
+top_frame = Frame(root)
+top_frame.grid(row=0, columnspan=2, padx=4, pady=4)
+
+Label(top_frame, text="City", font=font).grid(row=0, column=0, sticky="W", padx=4, pady=4)
+
+entry_city = Entry(top_frame, font=font)
+entry_city.grid(row=0, column=1, padx=4, pady=4)
+entry_city.focus_set()
+
+button_city = Button(top_frame, text="Show Weather", command=show, font=font, relief=GROOVE)
+button_city.grid(row=1, columnspan=2, padx=4, pady=4)
+
+root.update()
+root.minsize(200, root.winfo_height())
+root.bind("<Return>", lambda x: show())     # invoke function on pressing enter
+
+# scaling
+root.columnconfigure(0, weight=1)
+root.columnconfigure(1, weight=1)
+root.rowconfigure(0, weight=1)
+root.rowconfigure(1, weight=1)
+
 root.mainloop()
