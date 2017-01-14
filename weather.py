@@ -93,6 +93,7 @@ class Weather:
                                     font=("Helvetica", 10, "bold"))
             label_empty_str.place(relx=0.5, rely=0.5, anchor="center")
             label_empty_str.pack(fill=BOTH, expand=1, padx=4, pady=4)
+
         button_city.config(state=NORMAL)
 
     # get the weather information of the passed city id
@@ -254,8 +255,8 @@ class Weather:
 def show():
     city = entry_city.get()
     print city
-    content_frame = Frame(root)
-    content_frame.grid(row=1, columnspan=2)
+    for child in content_frame.winfo_children():
+        child.destroy()
     Weather(content_frame, city)
 
 root = Tk()
@@ -279,6 +280,9 @@ Label(top_frame, text="City", font=font).grid(row=0, column=0, sticky="W", padx=
 entry_city = Entry(top_frame, font=font)
 entry_city.grid(row=0, column=1, padx=4, pady=4)
 entry_city.focus_set()
+
+content_frame = Frame(root)
+content_frame.grid(row=1, columnspan=2)
 
 button_city = Button(top_frame, text="Show Weather", command=show, font=font, relief=GROOVE)
 button_city.grid(row=1, columnspan=2, padx=4, pady=4)
