@@ -23,7 +23,8 @@ Extract the zip and open ```weather.exe```.
 
 ## Screenshots
 
-<img src="screenshot.png" alt="Windows Sunshine App Screenshot" >
+<img src="screenshot1.png" alt="Windows Sunshine App Screenshot 1" >
+<img src="screenshot2.png" alt="Windows Sunshine App Screenshot 2" >
 
 ## License
 The content of this repository is licensed under [MIT LICENSE](LICENSE.MD).
