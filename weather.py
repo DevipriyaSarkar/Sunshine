@@ -262,7 +262,7 @@ def show():
 root = Tk()
 root.wm_title("Sunshine")
 if sp == 'linux' or sp == 'linux2' or sp == 'darwin':
-    img = PhotoImage(file='sun.png')
+    img = ImageTk.PhotoImage(Image.open('sun.png'))
     root.tk.call('wm', 'iconphoto', root._w, img)
 else:
     root.iconbitmap(default='sun.ico')
